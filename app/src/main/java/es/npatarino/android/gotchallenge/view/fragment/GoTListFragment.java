@@ -21,18 +21,16 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import es.npatarino.android.gotchallenge.CharactesMvp;
 import es.npatarino.android.gotchallenge.Constants;
 import es.npatarino.android.gotchallenge.GoTApplication;
 import es.npatarino.android.gotchallenge.R;
 import es.npatarino.android.gotchallenge.injection.module.GoTListFragmentModule;
 import es.npatarino.android.gotchallenge.model.GoTCharacter;
 import es.npatarino.android.gotchallenge.model.GoTHouse;
-import es.npatarino.android.gotchallenge.repository.GoTRepository;
 import es.npatarino.android.gotchallenge.view.activity.DetailActivity;
 import es.npatarino.android.gotchallenge.view.adapter.GoTAdapter;
 import es.npatarino.android.gotchallenge.view.listener.ItemClickListener;
-import rx.Observable;
-import rx.Subscription;
 
 public class GoTListFragment extends FragmentBase implements ItemClickListener {
 
@@ -40,17 +38,13 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener {
 
     @Inject GoTAdapter adapter;
     @Inject LayoutManager layoutManager;
-    @Inject GoTRepository goTRepository;
+    @Inject
+    CharactesMvp.Presenter presenter;
 
     @BindView(R.id.progressBar) ContentLoadingProgressBar progressBar;
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
 
     private SearchView searchView;
-
-    private GoTHouse goTHouse;
-    private String query;
-
-    private Subscription subscription;
 
     public static Fragment newInstance() {
         return new GoTListFragment();
@@ -77,41 +71,15 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener {
 
         configRecyclerView();
         displayLoading(true);
-        getCharacters();
+        presenter.loadCharacters();
 
         return rootView;
     }
 
-    private void getHouse(){
-        if(getArguments() != null)
-            goTHouse = getArguments().getParcelable(Constants.ViewFlow.EXTRA_HOUSE);
-    }
-
-    private void getCharacters(){
-        Observable<GoTCharacter> character = goTRepository.getCharacters()
-                .concatMap(Observable::from);
-        character = checkHouse(character);
-        character = checkQuery(character);
-        subscription = character.toList().subscribe(characters -> {
-                displayLoading(false);
-                displayCharacters(characters);
-            }, error -> {
-                displayLoading(false);
-            });
-    }
-
-    private Observable<GoTCharacter> checkQuery(Observable<GoTCharacter> character){
-        if(query != null && !query.isEmpty())
-            character = character.filter(goTCharacter ->
-                    goTCharacter.getName().contains(query));
-        return character;
-    }
-
-    private Observable<GoTCharacter> checkHouse(Observable<GoTCharacter> character){
-        if(goTHouse != null)
-            character = character.filter(goTCharacter ->
-                    goTCharacter.getHouseId().equals(goTHouse.getHouseId()));
-        return character;
+    private GoTHouse getHouse(){
+        return getArguments() != null ?
+             getArguments().getParcelable(Constants.ViewFlow.EXTRA_HOUSE) :
+                null;
     }
 
     private void displayCharacters(List<GoTCharacter> characters) {
