@@ -10,11 +10,14 @@ import dagger.Provides;
 import es.npatarino.android.gotchallenge.Constants;
 import es.npatarino.android.gotchallenge.R;
 import es.npatarino.android.gotchallenge.model.mapper.GoTEntityMapper;
+import es.npatarino.android.gotchallenge.model.mapper.GoTRealmMapper;
 import es.npatarino.android.gotchallenge.repository.GoTFactoryRepository;
 import es.npatarino.android.gotchallenge.repository.GoTRepository;
 import es.npatarino.android.gotchallenge.repository.data.LocalDataSource;
 import es.npatarino.android.gotchallenge.repository.data.RetrofitDataSource;
 import es.npatarino.android.gotchallenge.repository.service.GoTService;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -47,19 +50,31 @@ public class GoTRepositoryModule {
     }
 
     @Provides @Singleton
-    public RetrofitDataSource provideRetrofitDataSource(GoTService goTService){
-        return new RetrofitDataSource(goTService);
+    public RetrofitDataSource provideRetrofitDataSource(GoTService goTService, GoTRealmMapper goTRealmMapper){
+        return new RetrofitDataSource(goTService, goTRealmMapper);
     }
 
     @Provides @Singleton
-    public LocalDataSource provideLocalDataSource(){
-        return new LocalDataSource();
+    public Realm provideRealm(Context context) {
+        RealmConfiguration config = new RealmConfiguration.Builder(context).build();
+        return Realm.getInstance(config);
+    }
+
+    @Provides @Singleton
+    public GoTRealmMapper provideRealmMapper(Realm realm){
+        return new GoTRealmMapper(realm);
+    }
+
+    @Provides @Singleton
+    public LocalDataSource provideLocalDataSource(Realm realm, GoTEntityMapper goTEntityMapper){
+        return new LocalDataSource(realm, goTEntityMapper);
     }
 
     @Provides @Singleton
     GoTRepository provideGoTRepository(GoTEntityMapper goTEntityMapper,
+                                       GoTRealmMapper goTRealmMapper,
                                        RetrofitDataSource retrofitDataSource,
                                        LocalDataSource localDataSource){
-        return new GoTFactoryRepository(goTEntityMapper, retrofitDataSource, localDataSource);
+        return new GoTFactoryRepository(goTEntityMapper, goTRealmMapper, retrofitDataSource, localDataSource);
     }
 }

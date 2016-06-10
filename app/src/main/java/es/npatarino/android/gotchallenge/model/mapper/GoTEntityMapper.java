@@ -22,7 +22,7 @@ public class GoTEntityMapper {
         return goTCharacters;
     }
 
-    private GoTCharacter transform(GoTCharacterEntity goTCharacterEntity) {
+    public GoTCharacter transform(GoTCharacterEntity goTCharacterEntity) {
         GoTCharacter goTCharacter = new GoTCharacter();
         goTCharacter.setName(goTCharacterEntity.getName());
         goTCharacter.setImageUrl(goTCharacterEntity.getImageUrl());

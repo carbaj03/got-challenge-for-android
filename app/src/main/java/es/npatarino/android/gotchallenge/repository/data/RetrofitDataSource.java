@@ -2,30 +2,30 @@ package es.npatarino.android.gotchallenge.repository.data;
 
 import java.util.List;
 
-import es.npatarino.android.gotchallenge.model.entity.GoTCharacterEntity;
-import es.npatarino.android.gotchallenge.repository.data.GoTDataSource;
+import es.npatarino.android.gotchallenge.model.GoTCharacter;
+import es.npatarino.android.gotchallenge.model.mapper.GoTRealmMapper;
 import es.npatarino.android.gotchallenge.repository.service.GoTService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import rx.functions.Action1;
 
 public class RetrofitDataSource implements GoTDataSource {
 
     private GoTService goTService;
+    private GoTRealmMapper goTRealmMapper;
 
-    public RetrofitDataSource(GoTService goTService) {
+    public RetrofitDataSource(GoTService goTService, GoTRealmMapper goTRealmMapper) {
         this.goTService = goTService;
+        this.goTRealmMapper = goTRealmMapper;
     }
 
     @Override
-    public Observable<List<GoTCharacterEntity>> getCharacters() {
-
-            return goTService.listCharacters();
-
+    public Observable<List<GoTCharacter>> getCharacters() {
+        Observable<List<GoTCharacter>> characters = goTService.listCharacters();
+        return characters.doOnNext(new Action1<List<GoTCharacter>>() {
+            @Override
+            public void call(List<GoTCharacter> goTCharacter) {
+                goTRealmMapper.persistCharacters(goTCharacter);
+            }
+        });
     }
 }

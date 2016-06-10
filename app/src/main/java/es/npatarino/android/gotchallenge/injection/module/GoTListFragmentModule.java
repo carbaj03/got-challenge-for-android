@@ -6,7 +6,10 @@ import android.support.v7.widget.RecyclerView.LayoutManager;
 
 import dagger.Module;
 import dagger.Provides;
+import es.npatarino.android.gotchallenge.CharactesMvp;
 import es.npatarino.android.gotchallenge.injection.scope.FragmentScope;
+import es.npatarino.android.gotchallenge.presenter.GoTListFragmentPresenter;
+import es.npatarino.android.gotchallenge.repository.GoTRepository;
 import es.npatarino.android.gotchallenge.view.adapter.GoTAdapter;
 import es.npatarino.android.gotchallenge.view.fragment.GoTListFragment;
 import es.npatarino.android.gotchallenge.view.listener.ItemClickListener;
@@ -32,5 +35,10 @@ public class GoTListFragmentModule {
     @Provides @FragmentScope
     LayoutManager provideLayoutManager(Context context){
         return new LinearLayoutManager(context);
+    }
+
+    @Provides @FragmentScope
+    CharactesMvp.Presenter providePresenter(GoTRepository goTRepository){
+        return new GoTListFragmentPresenter(goTListFragment, goTRepository);
     }
 }

@@ -1,21 +1,30 @@
 package es.npatarino.android.gotchallenge.repository.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import es.npatarino.android.gotchallenge.model.GoTCharacter;
 import es.npatarino.android.gotchallenge.model.entity.GoTCharacterEntity;
+import es.npatarino.android.gotchallenge.model.mapper.GoTEntityMapper;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import rx.functions.Func1;
 
 public class LocalDataSource implements GoTDataSource {
 
-    @Override
-    public Observable<List<GoTCharacterEntity>> getCharacters() {
-            List<GoTCharacterEntity> characterEntities = new ArrayList<>();
+    private Realm realm;
+    private GoTEntityMapper goTEntityMapper;
 
-            return Observable.from(characterEntities).toList()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io());
+    public LocalDataSource(Realm realm, GoTEntityMapper goTEntityMapper) {
+        this.realm = realm;
+        this.goTEntityMapper = goTEntityMapper;
+    }
+
+    @Override
+    public Observable<List<GoTCharacter>> getCharacters() {
+         RealmResults<GoTCharacterEntity> query = realm.where(GoTCharacterEntity.class)
+                .isNotNull("name")
+                .findAllSortedAsync("name");
+        return Observable.from(query).map(goTCharacterEntity -> goTEntityMapper.transform(goTCharacterEntity)).toList();
     }
 }

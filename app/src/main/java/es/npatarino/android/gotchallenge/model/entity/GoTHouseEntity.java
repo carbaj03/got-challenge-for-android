@@ -2,13 +2,13 @@ package es.npatarino.android.gotchallenge.model.entity;
 
 import com.google.gson.annotations.SerializedName;
 
-public class GoTHouseEntity {
+import io.realm.RealmObject;
 
-    @SerializedName("houseImageUrl")
+public class GoTHouseEntity  extends RealmObject {
+
+
     String houseImageUrl;
-    @SerializedName("houseName")
     String houseName;
-    @SerializedName("houseId")
     String houseId;
 
     public String getHouseImageUrl() {

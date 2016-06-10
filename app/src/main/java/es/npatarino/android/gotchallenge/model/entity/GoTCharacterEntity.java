@@ -5,20 +5,16 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmObject;
 
-public class GoTCharacterEntity implements Parcelable {
 
-    @SerializedName("name")
+public class GoTCharacterEntity extends RealmObject {
+
     String name;
-    @SerializedName("imageUrl")
     String imageUrl;
-    @SerializedName("description")
     String description;
-    @SerializedName("houseImageUrl")
     String houseImageUrl;
-    @SerializedName("houseName")
     String houseName;
-    @SerializedName("houseId")
     String houseId;
 
     public String getHouseImageUrl() {
@@ -69,39 +65,4 @@ public class GoTCharacterEntity implements Parcelable {
         this.description = description;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(imageUrl);
-        dest.writeString(description);
-        dest.writeString(houseImageUrl);
-        dest.writeString(houseName);
-        dest.writeString(houseId);
-    }
-
-    protected GoTCharacterEntity(Parcel in) {
-        name = in.readString();
-        imageUrl = in.readString();
-        description = in.readString();
-        houseImageUrl = in.readString();
-        houseName = in.readString();
-        houseId = in.readString();
-    }
-
-    public static final Creator<GoTCharacterEntity> CREATOR = new Creator<GoTCharacterEntity>() {
-        @Override
-        public GoTCharacterEntity createFromParcel(Parcel in) {
-            return new GoTCharacterEntity(in);
-        }
-
-        @Override
-        public GoTCharacterEntity[] newArray(int size) {
-            return new GoTCharacterEntity[size];
-        }
-    };
 }

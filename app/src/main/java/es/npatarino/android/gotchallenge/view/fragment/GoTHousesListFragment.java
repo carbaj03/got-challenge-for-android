@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import es.npatarino.android.gotchallenge.GoTApplication;
+import es.npatarino.android.gotchallenge.HouseMvp;
 import es.npatarino.android.gotchallenge.R;
 import es.npatarino.android.gotchallenge.injection.module.GoTHousesListFragmentModule;
 import es.npatarino.android.gotchallenge.model.GoTHouse;
@@ -23,11 +24,8 @@ import es.npatarino.android.gotchallenge.repository.GoTRepository;
 import es.npatarino.android.gotchallenge.view.activity.HouseActivity;
 import es.npatarino.android.gotchallenge.view.adapter.GoTHouseAdapter;
 import es.npatarino.android.gotchallenge.view.listener.ItemClickListener;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
-public class GoTHousesListFragment extends FragmentBase implements ItemClickListener{
+public class GoTHousesListFragment extends FragmentBase implements ItemClickListener, HouseMvp.View{
 
     private static final String TAG = GoTHousesListFragment.class.getSimpleName();
 
@@ -36,6 +34,7 @@ public class GoTHousesListFragment extends FragmentBase implements ItemClickList
 
     @Inject GoTHouseAdapter adapter;
     @Inject GoTRepository goTRepository;
+    @Inject HouseMvp.Presenter presenter;
 
     public static GoTHousesListFragment newInstance() {
         return new GoTHousesListFragment();
@@ -47,27 +46,10 @@ public class GoTHousesListFragment extends FragmentBase implements ItemClickList
         ButterKnife.bind(this, rootView);
 
         configRecyclerView();
-        displayLoading(true);
 
-        getHouses();
+        presenter.loadHouses();
 
         return rootView;
-    }
-
-    private void getHouses() {
-        goTRepository.getCharacters()
-                .map(goTCharacters -> Observable.from(goTCharacters)
-                        .concatMap(goTCharacter -> Observable.just(new GoTHouse(goTCharacter)))
-                        .filter(goTHouse -> goTHouse.getHouseId() != null && goTHouse.getHouseId().length() > 0)
-                        .distinct(GoTHouse::getHouseId).toList().toBlocking().single())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(houses -> {
-                    displayLoading(false);
-                    displayHouses(houses);
-                }, error -> {
-                    displayLoading(false);
-                });
     }
 
     private void configRecyclerView() {
@@ -76,12 +58,14 @@ public class GoTHousesListFragment extends FragmentBase implements ItemClickList
         recyclerView.setAdapter(adapter);
     }
 
-    private void displayHouses(List<GoTHouse> houses) {
-        adapter.addAll(houses);
+    @Override
+    public void displayHouses(List<GoTHouse> goTHouses) {
+        adapter.addAll(goTHouses);
         adapter.notifyDataSetChanged();
     }
 
-    private void displayLoading(boolean show) {
+    @Override
+    public void displayLoading(boolean show) {
         if (show)
             progressBar.show();
         else

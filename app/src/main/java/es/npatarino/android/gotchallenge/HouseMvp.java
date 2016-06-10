@@ -5,21 +5,18 @@ import java.util.List;
 import es.npatarino.android.gotchallenge.model.GoTCharacter;
 import es.npatarino.android.gotchallenge.model.GoTHouse;
 
-public interface CharactesMvp {
+public interface HouseMvp {
 
     interface Model {
     }
 
     interface View {
-        void displayCharacters(List<GoTCharacter> goTCharacters);
+        void displayHouses(List<GoTHouse> goTHouses);
         void displayLoading(boolean show);
-        GoTHouse getHouse();
     }
 
     interface Presenter {
-        void loadCharacters();
-        void loadQuery(String query);
-        void onCreate();
+        void loadHouses();
         void onDestroy();
     }
 }

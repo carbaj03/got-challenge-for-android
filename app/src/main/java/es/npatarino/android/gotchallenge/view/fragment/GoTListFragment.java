@@ -32,19 +32,16 @@ import es.npatarino.android.gotchallenge.view.activity.DetailActivity;
 import es.npatarino.android.gotchallenge.view.adapter.GoTAdapter;
 import es.npatarino.android.gotchallenge.view.listener.ItemClickListener;
 
-public class GoTListFragment extends FragmentBase implements ItemClickListener {
+public class GoTListFragment extends FragmentBase implements ItemClickListener, CharactesMvp.View {
 
     public static final String TAG = GoTListFragment.class.getSimpleName();
 
     @Inject GoTAdapter adapter;
     @Inject LayoutManager layoutManager;
-    @Inject
-    CharactesMvp.Presenter presenter;
+    @Inject CharactesMvp.Presenter presenter;
 
     @BindView(R.id.progressBar) ContentLoadingProgressBar progressBar;
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
-
-    private SearchView searchView;
 
     public static Fragment newInstance() {
         return new GoTListFragment();
@@ -61,7 +58,7 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getHouse();
+        presenter.onCreate();
     }
 
     @Override
@@ -70,24 +67,25 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener {
         ButterKnife.bind(this, rootView);
 
         configRecyclerView();
-        displayLoading(true);
+
         presenter.loadCharacters();
 
         return rootView;
     }
 
-    private GoTHouse getHouse(){
+    @Override
+    public GoTHouse getHouse(){
         return getArguments() != null ?
              getArguments().getParcelable(Constants.ViewFlow.EXTRA_HOUSE) :
                 null;
     }
 
-    private void displayCharacters(List<GoTCharacter> characters) {
+    public void displayCharacters(List<GoTCharacter> characters) {
         adapter.addAll(characters);
         adapter.notifyDataSetChanged();
     }
 
-    private void displayLoading(boolean show) {
+    public void displayLoading(boolean show) {
         if (show)
             progressBar.show();
         else
@@ -126,21 +124,16 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener {
 
     private void configSearchView(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        cancelSearch(searchView);
+        characterSearch(searchView);
+    }
 
-        searchView.setOnCloseListener(() -> {
-            query = "";
-            displayLoading(true);
-            getCharacters();
-            return false;
-        });
-
+    private void characterSearch(SearchView searchView) {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query2) {
-                query = query2;
-                displayLoading(true);
-                getCharacters();
+            public boolean onQueryTextSubmit(String query) {
+                presenter.loadQuery(query);
                 return false;
             }
 
@@ -151,10 +144,16 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener {
         });
     }
 
+    private void cancelSearch(SearchView searchView) {
+        searchView.setOnCloseListener(() -> {
+            presenter.loadQuery("");
+            return false;
+        });
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (subscription != null && !subscription.isUnsubscribed())
-            subscription.unsubscribe();
+        presenter.onDestroy();
     }
 }
