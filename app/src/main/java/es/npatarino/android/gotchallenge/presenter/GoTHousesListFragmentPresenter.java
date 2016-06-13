@@ -22,11 +22,12 @@ public class GoTHousesListFragmentPresenter implements Presenter {
 
     @Override
     public void loadHouses() {
-
+        view.displayLoading(true);
         subscription = goTRepository.getCharacters()
                 .concatMap(Observable::from)
                 .map(GoTHouse::new)
-                .filter(goTHouse -> goTHouse.getHouseId() != null && goTHouse.getHouseId().length() > 0).distinct().toList()
+                .filter(goTHouse -> goTHouse.getHouseId() != null && goTHouse.getHouseId().length() > 0)
+                .distinct(GoTHouse::getHouseId).toList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(houses -> {

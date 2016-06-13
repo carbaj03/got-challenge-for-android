@@ -30,7 +30,6 @@ public class DetailActivity extends BaseActivity {
     private static final String EXTRA_CHARACTER = "CHARACTER";
 
     @BindView(R.id.iv_photo) ImageView ivPhoto;
-    @BindView(R.id.tv_name) TextView tvName;
     @BindView(R.id.tv_description) TextView tvDescripcion;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -57,7 +56,6 @@ public class DetailActivity extends BaseActivity {
 
     private void displayCharacter() {
         Picasso.with(this).load(character.getImageUrl()).fit().centerInside().into(ivPhoto);
-        tvName.setText(character.getName());
         tvDescripcion.setText(character.getDescription());
     }
 

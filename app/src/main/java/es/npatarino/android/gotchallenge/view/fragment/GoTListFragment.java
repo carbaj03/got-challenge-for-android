@@ -125,7 +125,6 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener, 
     private void configSearchView(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        cancelSearch(searchView);
         characterSearch(searchView);
     }
 
@@ -139,15 +138,10 @@ public class GoTListFragment extends FragmentBase implements ItemClickListener, 
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if(newText.isEmpty())
+                    presenter.loadQuery("");
                 return false;
             }
-        });
-    }
-
-    private void cancelSearch(SearchView searchView) {
-        searchView.setOnCloseListener(() -> {
-            presenter.loadQuery("");
-            return false;
         });
     }
 

@@ -40,7 +40,7 @@ public class GoTRealmMapper {
         c.setName(goTCharacter.getName());
 
         realm.beginTransaction();
-        realm.copyToRealm(c);
+        realm.copyToRealmOrUpdate(c);
         realm.commitTransaction();
     }
 

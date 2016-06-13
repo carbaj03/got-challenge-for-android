@@ -16,6 +16,7 @@ import es.npatarino.android.gotchallenge.repository.GoTRepository;
 import es.npatarino.android.gotchallenge.repository.data.LocalDataSource;
 import es.npatarino.android.gotchallenge.repository.data.RetrofitDataSource;
 import es.npatarino.android.gotchallenge.repository.service.GoTService;
+import es.npatarino.android.gotchallenge.util.NetworkUtil;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import retrofit2.Retrofit;
@@ -56,8 +57,9 @@ public class GoTRepositoryModule {
 
     @Provides @Singleton
     public Realm provideRealm(Context context) {
-        RealmConfiguration config = new RealmConfiguration.Builder(context).build();
-        return Realm.getInstance(config);
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder(context).build();
+        Realm.setDefaultConfiguration(realmConfig);
+        return Realm.getDefaultInstance();
     }
 
     @Provides @Singleton
@@ -71,10 +73,14 @@ public class GoTRepositoryModule {
     }
 
     @Provides @Singleton
-    GoTRepository provideGoTRepository(GoTEntityMapper goTEntityMapper,
-                                       GoTRealmMapper goTRealmMapper,
+    NetworkUtil networkUtil(Context context){
+        return new NetworkUtil(context);
+    }
+
+    @Provides @Singleton
+    GoTRepository provideGoTRepository(NetworkUtil networkUtil,
                                        RetrofitDataSource retrofitDataSource,
                                        LocalDataSource localDataSource){
-        return new GoTFactoryRepository(goTEntityMapper, goTRealmMapper, retrofitDataSource, localDataSource);
+        return new GoTFactoryRepository(networkUtil, retrofitDataSource, localDataSource);
     }
 }

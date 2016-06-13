@@ -9,25 +9,23 @@ import es.npatarino.android.gotchallenge.model.mapper.GoTRealmMapper;
 import es.npatarino.android.gotchallenge.repository.data.GoTDataSource;
 import es.npatarino.android.gotchallenge.repository.data.LocalDataSource;
 import es.npatarino.android.gotchallenge.repository.data.RetrofitDataSource;
+import es.npatarino.android.gotchallenge.util.NetworkUtil;
 import rx.Observable;
 import rx.functions.Action1;
 
 public class GoTFactoryRepository implements GoTRepository {
 
-    GoTEntityMapper goTEntityMapper;
-    GoTRealmMapper goTRealmMapper;
-
     RetrofitDataSource retrofitDataSource;
     LocalDataSource localDataSource;
 
-    public GoTFactoryRepository(GoTEntityMapper goTEntityMapper,
-                                GoTRealmMapper goTRealmMapper,
+    NetworkUtil networkUtil;
+
+    public GoTFactoryRepository(NetworkUtil networkUtil,
                                 RetrofitDataSource retrofitDataSource,
                                 LocalDataSource localDataSource) {
-        this.goTEntityMapper = goTEntityMapper;
-        this.goTRealmMapper = goTRealmMapper;
         this.retrofitDataSource = retrofitDataSource;
         this.localDataSource = localDataSource;
+        this.networkUtil = networkUtil;
     }
 
     @Override
@@ -36,8 +34,9 @@ public class GoTFactoryRepository implements GoTRepository {
     }
 
     private GoTDataSource getBestDataSource() {
-//        if ((!NetworkGoTDataSource.getInstance().isNetworkAvailable()) ||
-//                (!CacheGoTPolicy.isCacheExpired()))
-        return retrofitDataSource;
+        if (networkUtil.isNetworkAvailable() )
+            return retrofitDataSource;
+        else
+            return localDataSource;
     }
 }

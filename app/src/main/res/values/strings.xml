@@ -11,4 +11,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_search">Search</string>
 
+    <dimen name="expanded_title_margin_start">48dp</dimen>
+    <dimen name="expanded_title_margin_end">16dp</dimen>
+
 </resources>

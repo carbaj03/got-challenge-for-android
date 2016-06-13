@@ -6,7 +6,10 @@ import es.npatarino.android.gotchallenge.model.GoTCharacter;
 import es.npatarino.android.gotchallenge.model.mapper.GoTRealmMapper;
 import es.npatarino.android.gotchallenge.repository.service.GoTService;
 import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class RetrofitDataSource implements GoTDataSource {
 
@@ -20,12 +23,26 @@ public class RetrofitDataSource implements GoTDataSource {
 
     @Override
     public Observable<List<GoTCharacter>> getCharacters() {
-        Observable<List<GoTCharacter>> characters = goTService.listCharacters();
-        return characters.doOnNext(new Action1<List<GoTCharacter>>() {
+
+        goTService.listCharacters()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<GoTCharacter>>() {
             @Override
-            public void call(List<GoTCharacter> goTCharacter) {
-                goTRealmMapper.persistCharacters(goTCharacter);
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(List<GoTCharacter> goTCharacters) {
+                goTRealmMapper.persistCharacters(goTCharacters);
             }
         });
+
+        return goTService.listCharacters();
     }
 }
